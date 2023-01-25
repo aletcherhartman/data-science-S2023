@@ -39,7 +39,7 @@ knitr::opts_chunk$set(echo = TRUE)
     -   `Alt` + `-` Insert assignment operator (for declaring variables
         and shit)
 
-    -    `Cmd/Ctrl` + `Shift` + `M` Insert pipe opperator %\>%
+    -   `Cmd/Ctrl` + `Shift` + `M` Insert pipe opperator %\>%
 
     -   `Cmd/Ctrl` + `Enter` Run selected lines
 

@@ -40,7 +40,7 @@ airport == ATL
 
 **Observations**:
 
--   Write your explanation here
+-   airport contains a string so you cant compare using ==
 
 ## Casting
 
@@ -57,7 +57,7 @@ Sometimes our data will not be in the form we want; in this case we may need to 
 
 ```{r q2-task}
 v_string <- c("00", "45", "90")
-v_integer <- NA_real_
+v_integer <- as.integer(v_string)#NA_real_
 ```
 
 Use the following test to check your work.
