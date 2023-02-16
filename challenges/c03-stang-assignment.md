@@ -124,7 +124,7 @@ df_stang <- read_csv(filename)
     ## ── Column specification ────────────────────────────────────────────────────────
     ## Delimiter: ","
     ## chr (1): alloy
-    ## dbl (7): thick, E_00, mu_00, E_45, mu_45, E_90, mu_90
+    ## dbl (7): thick, E_00, nu_00, E_45, nu_45, E_90, nu_90
     ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
@@ -134,7 +134,7 @@ df_stang
 ```
 
     ## # A tibble: 9 × 8
-    ##   thick  E_00 mu_00  E_45  mu_45  E_90 mu_90 alloy  
+    ##   thick  E_00 nu_00  E_45  nu_45  E_90 nu_90 alloy  
     ##   <dbl> <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl> <chr>  
     ## 1 0.022 10600 0.321 10700  0.329 10500 0.31  al_24st
     ## 2 0.022 10600 0.323 10500  0.331 10700 0.323 al_24st
@@ -161,17 +161,22 @@ df_stang_long <-
   pivot_longer(
     names_to = c(".value","angle"),
     names_sep = "_",
-    #values_drop_na = TRUE,
+    names_transform = list('angle' = as.integer),
     cols = c(-thick, -alloy)
-  ) %>%
-  mutate(angle = as.integer(angle))
+  ) %>% 
+  filter(E > 0)
+  
+
+
+#%>%
+  # mutate(angle = as.integer(angle))
 
 
 df_stang_long
 ```
 
-    ## # A tibble: 27 × 5
-    ##    thick alloy   angle     E    mu
+    ## # A tibble: 26 × 5
+    ##    thick alloy   angle     E    nu
     ##    <dbl> <chr>   <int> <dbl> <dbl>
     ##  1 0.022 al_24st     0 10600 0.321
     ##  2 0.022 al_24st    45 10700 0.329
@@ -183,7 +188,7 @@ df_stang_long
     ##  8 0.032 al_24st    45 10400 0.318
     ##  9 0.032 al_24st    90 10300 0.322
     ## 10 0.032 al_24st     0 10300 0.319
-    ## # … with 17 more rows
+    ## # … with 16 more rows
 
 Use the following tests to check your work.
 
@@ -193,7 +198,7 @@ Use the following tests to check your work.
 assertthat::assert_that(
               setequal(
                 df_stang_long %>% names,
-                c("thick", "alloy", "angle", "E", "mu")
+                c("thick", "alloy", "angle", "E", "nu")
               )
             )
 ```
@@ -202,7 +207,12 @@ assertthat::assert_that(
 
 ``` r
 ## Dimensions
-#assertthat::assert_that(all(dim(df_stang_long) == c(26, 5)))
+assertthat::assert_that(all(dim(df_stang_long) == c(26, 5)))
+```
+
+    ## [1] TRUE
+
+``` r
 ## Type
 assertthat::assert_that(
               (df_stang_long %>% pull(angle) %>% typeof()) == "integer"
@@ -216,10 +226,6 @@ print("Very good!")
 ```
 
     ## [1] "Very good!"
-
-``` r
-# !!!!!!!!!!! I commented out the size check on the data frame so that I could submit my df is not the right size!!!!!!!!!!!!!!!!!!!!!!
-```
 
 # EDA
 
@@ -236,13 +242,13 @@ print("Very good!")
 glimpse(df_stang_long)
 ```
 
-    ## Rows: 27
+    ## Rows: 26
     ## Columns: 5
     ## $ thick <dbl> 0.022, 0.022, 0.022, 0.022, 0.022, 0.022, 0.032, 0.032, 0.032, 0…
     ## $ alloy <chr> "al_24st", "al_24st", "al_24st", "al_24st", "al_24st", "al_24st"…
     ## $ angle <int> 0, 45, 90, 0, 45, 90, 0, 45, 90, 0, 45, 90, 0, 45, 90, 0, 45, 90…
     ## $ E     <dbl> 10600, 10700, 10500, 10600, 10500, 10700, 10400, 10400, 10300, 1…
-    ## $ mu    <dbl> 0.321, 0.329, 0.310, 0.323, 0.331, 0.323, 0.329, 0.318, 0.322, 0…
+    ## $ nu    <dbl> 0.321, 0.329, 0.310, 0.323, 0.331, 0.323, 0.329, 0.318, 0.322, 0…
 
 ``` r
 unique(df_stang_long$alloy)
@@ -260,38 +266,38 @@ unique(df_stang_long$thick)
 unique(df_stang_long$E)
 ```
 
-    ## [1] 10600 10700 10500 10400 10300 10000  9900 10100    -1
+    ## [1] 10600 10700 10500 10400 10300 10000  9900 10100
 
 ``` r
-unique(df_stang_long$mu)
+unique(df_stang_long$nu)
 ```
 
-    ##  [1]  0.321  0.329  0.310  0.323  0.331  0.318  0.322  0.319  0.326  0.330
-    ## [11]  0.327  0.328  0.320  0.315  0.314  0.312  0.316  0.311 -1.000
+    ##  [1] 0.321 0.329 0.310 0.323 0.331 0.318 0.322 0.319 0.326 0.330 0.327 0.328
+    ## [13] 0.320 0.315 0.314 0.312 0.316 0.311
 
 ``` r
 mean(df_stang_long$E)
 ```
 
-    ## [1] 9951.815
+    ## [1] 10334.62
 
 ``` r
 sd(df_stang_long$E)
 ```
 
-    ## [1] 2006.406
+    ## [1] 268.2421
 
 ``` r
-mean(df_stang_long$mu)
+mean(df_stang_long$nu)
 ```
 
-    ## [1] 0.2722963
+    ## [1] 0.3212308
 
 ``` r
-sd(df_stang_long$mu)
+sd(df_stang_long$nu)
 ```
 
-    ## [1] 0.2543569
+    ## [1] 0.006742745
 
 **Observations**:
 
@@ -306,7 +312,7 @@ sd(df_stang_long$mu)
 - What thicknesses were tested?
   - 0.022, 0.032, 0.064, and 0.081 inches thick
 - Are there more unique values of E or mu?
-  - there are 19 unique values of mu and only 9 unique values of E
+  - there are 18 unique values of mu and only 8 unique values of E
 - Does E vary more with thickness or angle?
 
 ## Visualize
@@ -319,7 +325,7 @@ sd(df_stang_long$mu)
 ## TASK: Investigate your question from q1 here
 df_stang_long %>%
   ggplot(aes(x = angle, y = E, color = as_factor(thick))) +
-  geom_point()
+  geom_count()
 ```
 
 ![](c03-stang-assignment_files/figure-gfm/q3-task-1.png)<!-- -->
@@ -327,7 +333,7 @@ df_stang_long %>%
 ``` r
 df_stang_long %>%
   ggplot(aes(x = thick, y = E, color = as_factor(angle))) +
-  geom_point()
+  geom_count()
 ```
 
 ![](c03-stang-assignment_files/figure-gfm/q3-task-2.png)<!-- -->
@@ -379,10 +385,18 @@ df_stang_long %>%
 
 **Observations**:
 
+- from the box plots of E broken out by angle I would conclude that it
+  is very unlikely that the angle effects the elasticity
+- from the box plots and distribution of E broken out by thickens the
+  elasticity of the 0.022”, 0.032”, and 0.064” samples does not appear
+  to be dependent on their thickness. The elasticity of the 0.082” thick
+  samples appear to be lower overall.
 - given the graphs I made I don’t think I can conclusively say that E
   varies more with angle or thickness. I am also not sure that I could
-  conclusively say that it varied with ether in any way.
-- it is also possible that the outlire is making it harder to see.
+  conclusively say that it varied with ether in any way. To more
+  conclusively ansawr my question I would need to look more into the
+  strange behavior of the 0.082” thick samples and I would need to take
+  the covariance of the elasticity with angle and thickness.
 
 ### **q4** Consider the following statement:
 
@@ -399,7 +413,7 @@ Is this evidence *conclusive* one way or another? Why or why not?
 ## NOTE: No need to change; run this chunk
 df_stang_long %>%
 
-  ggplot(aes(mu, E, color = as_factor(thick))) +
+  ggplot(aes(nu, E, color = as_factor(thick))) +
   geom_point(size = 3) +
   theme_minimal()
 ```
@@ -409,14 +423,13 @@ df_stang_long %>%
 **Observations**:
 
 - Does this graph support or contradict the claim above?
-  - The evidence is not conclusive. The 0.081 in thick outlire makes it
-    very hard to read the rest of the data presented on the graph.
-  - There appears to be some clumping by thickness in the blob of non
-    outlire values but it is not possible to tell if that is true or an
-    artifact of the graph at this scale.
-  - to move forward I would try to find out why the outlire exists and
-    if it can be discarded I would make a graph that can better show the
-    other values.
+  - The evidence is not conclusive. The 0.081” thick samples appear to
+    have overall lower E values than the other samples but when looking
+    at the graph this does not hold true for any other thickness. All of
+    the other thicknesses have overlapping values that would seem to
+    support the initial claim.
+  - The discrepancy between the 0.081” thick samples and the other
+    samples could be due to experimental error.
 
 # References
 

@@ -75,10 +75,15 @@ df_stang_long <-
   pivot_longer(
     names_to = c(".value","angle"),
     names_sep = "_",
-    #values_drop_na = TRUE,
+    names_transform = list('angle' = as.integer),
     cols = c(-thick, -alloy)
-  ) %>%
-  mutate(angle = as.integer(angle))
+  ) %>% 
+  filter(E > 0)
+  
+
+
+#%>%
+  # mutate(angle = as.integer(angle))
 
 
 df_stang_long
@@ -92,11 +97,11 @@ Use the following tests to check your work.
 assertthat::assert_that(
               setequal(
                 df_stang_long %>% names,
-                c("thick", "alloy", "angle", "E", "mu")
+                c("thick", "alloy", "angle", "E", "nu")
               )
             )
 ## Dimensions
-#assertthat::assert_that(all(dim(df_stang_long) == c(26, 5)))
+assertthat::assert_that(all(dim(df_stang_long) == c(26, 5)))
 ## Type
 assertthat::assert_that(
               (df_stang_long %>% pull(angle) %>% typeof()) == "integer"
@@ -104,7 +109,7 @@ assertthat::assert_that(
 
 print("Very good!")
 
-# !!!!!!!!!!! I commented out the size check on the data frame so that I could submit my df is not the right size!!!!!!!!!!!!!!!!!!!!!!
+
 ```
 
 # EDA
@@ -123,11 +128,11 @@ glimpse(df_stang_long)
 unique(df_stang_long$alloy)
 unique(df_stang_long$thick)
 unique(df_stang_long$E)
-unique(df_stang_long$mu)
+unique(df_stang_long$nu)
 mean(df_stang_long$E)
 sd(df_stang_long$E)
-mean(df_stang_long$mu)
-sd(df_stang_long$mu)
+mean(df_stang_long$nu)
+sd(df_stang_long$nu)
 
 
 ```
@@ -143,7 +148,7 @@ sd(df_stang_long$mu)
 -   What thicknesses were tested?
     -   0.022, 0.032, 0.064, and 0.081 inches thick
 -   Are there more unique values of E or mu?
-    -   there are 19 unique values of mu and only 9 unique values of E
+    -   there are 18 unique values of mu and only 8 unique values of E
 -   Does E vary more with thickness or angle?
 
 ## Visualize
@@ -156,11 +161,11 @@ sd(df_stang_long$mu)
 ## TASK: Investigate your question from q1 here
 df_stang_long %>%
   ggplot(aes(x = angle, y = E, color = as_factor(thick))) +
-  geom_point()
+  geom_count()
 
 df_stang_long %>%
   ggplot(aes(x = thick, y = E, color = as_factor(angle))) +
-  geom_point()
+  geom_count()
 
 df_stang_long %>%
   ggplot(aes(x = angle, y = E, group = as_factor(thick))) +
@@ -186,8 +191,9 @@ df_stang_long %>%
 
 **Observations**:
 
--   given the graphs I made I don't think I can conclusively say that E varies more with angle or thickness. I am also not sure that I could conclusively say that it varied with ether in any way.
--   it is also possible that the outlire is making it harder to see.
+-   from the box plots of E broken out by angle I would conclude that it is very unlikely that the angle effects the elasticity
+-   from the box plots and distribution of E broken out by thickens the elasticity of the 0.022", 0.032", and 0.064" samples does not appear to be dependent on their thickness. The elasticity of the 0.082" thick samples appear to be lower overall.
+-   given the graphs I made I don't think I can conclusively say that E varies more with angle or thickness. I am also not sure that I could conclusively say that it varied with ether in any way. To more conclusively ansawr my question I would need to look more into the strange behavior of the 0.082" thick samples and I would need to take the covariance of the elasticity with angle and thickness.
 
 ### **q4** Consider the following statement:
 
@@ -199,7 +205,7 @@ Note that the "amount of material" would vary with the thickness of a tested pla
 ## NOTE: No need to change; run this chunk
 df_stang_long %>%
 
-  ggplot(aes(mu, E, color = as_factor(thick))) +
+  ggplot(aes(nu, E, color = as_factor(thick))) +
   geom_point(size = 3) +
   theme_minimal()
 ```
@@ -207,9 +213,8 @@ df_stang_long %>%
 **Observations**:
 
 -   Does this graph support or contradict the claim above?
-    -   The evidence is not conclusive. The 0.081 in thick outlire makes it very hard to read the rest of the data presented on the graph.
-    -   There appears to be some clumping by thickness in the blob of non outlire values but it is not possible to tell if that is true or an artifact of the graph at this scale.
-    -   to move forward I would try to find out why the outlire exists and if it can be discarded I would make a graph that can better show the other values.
+    -   The evidence is not conclusive. The 0.081" thick samples appear to have overall lower E values than the other samples but when looking at the graph this does not hold true for any other thickness. All of the other thicknesses have overlapping values that would seem to support the initial claim.
+    -   The discrepancy between the 0.081" thick samples and the other samples could be due to experimental error.
 
 # References
 
