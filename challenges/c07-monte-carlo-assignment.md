@@ -206,7 +206,7 @@ df_q1
     ## # A tibble: 1 × 4
     ##   count_total   count_A  sd_A    fr
     ##         <int>     <int> <dbl> <dbl>
-    ## 1   800000000 628315048 0.411 0.785
+    ## 1   800000000 628314670 0.411 0.785
 
 ### **q2** Using your data in `df_q1`, estimate $\pi$.
 
@@ -218,7 +218,7 @@ pi_est <-
 pi_est 
 ```
 
-    ## [1] 3.141575
+    ## [1] 3.141573
 
 ``` r
 pi # pi as defined by r
@@ -238,7 +238,7 @@ to assess your $\pi$ estimate.
 ### **q3** Using a CLT approximation, produce a confidence interval for your estimate of $\pi$. Make sure you specify your confidence level. Does your interval include the true value of $\pi$? Was your chosen sample size sufficiently large so as to produce a trustworthy answer?
 
 ``` r
-confidence = 0.95
+confidence = qnorm( 1 - (1 - 0.99) / 2 )
 df_q3  <-  
   df_q1 %>%
     mutate(
@@ -255,25 +255,25 @@ df_q3
     ## # A tibble: 1 × 9
     ##   count_total   count_A  sd_A    fr pi_est     se_pi lo_pi hi_pi flag 
     ##         <int>     <int> <dbl> <dbl>  <dbl>     <dbl> <dbl> <dbl> <lgl>
-    ## 1   800000000 628315048 0.411 0.785   3.14 0.0000581  3.14  3.14 TRUE
+    ## 1   800000000 628314670 0.411 0.785   3.14 0.0000581  3.14  3.14 TRUE
 
 ``` r
 df_q3$pi_est
 ```
 
-    ## [1] 3.141575
+    ## [1] 3.141573
 
 ``` r
 df_q3$lo_pi 
 ```
 
-    ## [1] 3.14152
+    ## [1] 3.141424
 
 ``` r
 df_q3$hi_pi
 ```
 
-    ## [1] 3.14163
+    ## [1] 3.141723
 
 ``` r
 df_q3$flag
@@ -286,9 +286,9 @@ df_q3$flag
 - Does your interval include the true value of $\pi$?
   - Yes
 - What confidence level did you choose?
-  - 95%
+  - 99%
 - Was your sample size $n$ large enough? Why do you say that?
-  - Yes, for my n = 900,000,000 the estimate is within confidence bounds
+  - Yes, for my n = 800,000,000 the estimate is within confidence bounds
     and accurate to four decimal places. Given that we as engineers
     often substitute 3.14 for pi I think that I could have had a much
     smaller n and still had a reasonable estimate for engineering
