@@ -377,8 +377,8 @@ df_norm_sim <-
 
     ## Rows: 10,000,000
     ## Columns: 2
-    ## $ strength <dbl> 40356.70, 40099.85, 39789.40, 39671.77, 39707.43, 39364.44, 3…
-    ## $ g        <dbl> 1141.00946, 884.16673, 573.71580, 456.08430, 491.74709, 148.7…
+    ## $ strength <dbl> 39220.08, 39578.99, 40174.93, 39907.32, 39884.16, 39888.14, 3…
+    ## $ g        <dbl> 4.396912, 363.306502, 959.244619, 691.634547, 668.473490, 672…
 
 ``` r
 ## NOTE: The following code estimates the POF and a 95% confidence interval
@@ -401,7 +401,7 @@ df_norm_pof
     ## # A tibble: 1 × 3
     ##   pof_lo pof_est pof_hi
     ##    <dbl>   <dbl>  <dbl>
-    ## 1 0.0182  0.0183 0.0184
+    ## 1 0.0183  0.0183 0.0184
 
 - Assuming your scopus is the probability of failure `POF` defined
   above, does your estimate exhibit real variability, induced
@@ -539,13 +539,14 @@ df_samples %>%
     ## # A tibble: 1 × 6
     ##   term   .lower .estimate .upper .alpha .method   
     ##   <chr>   <dbl>     <dbl>  <dbl>  <dbl> <chr>     
-    ## 1 pof   0.00106    0.0188 0.0530   0.05 percentile
+    ## 1 pof   0.00125    0.0182 0.0488   0.05 percentile
 
 **Observations**:
 
 - Does the confidence interval above account for uncertainty arising
   from *Monte Carlo approximation* of the POF? Why or why not?
-  - (Your response here)
+  - yes pl norm gets rid of uncertainty from random sampling as stated
+    above
 - Does the confidence interval above account for uncertainty arising
   from *limited physical tests* (`df_samples`)? Why or why not?
   - i think id does a better job by pulling multiple samples but it can

@@ -328,7 +328,7 @@ df_samples %>%
 **Observations**:
 
 -   Does the confidence interval above account for uncertainty arising from *Monte Carlo approximation* of the POF? Why or why not?
-    -   (Your response here)
+    -   yes pl norm gets rid of uncertainty from random sampling as stated above
 -   Does the confidence interval above account for uncertainty arising from *limited physical tests* (`df_samples`)? Why or why not?
     -   i think id does a better job by pulling multiple samples but it can still only base its estimate on the data the model is based on.
 -   Can you confidently conclude that `POF < 0.03`? Why or why not?
