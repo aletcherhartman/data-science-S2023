@@ -24,7 +24,7 @@ Unlike exercises, **challenges will be graded**. The following rubrics define ho
 <!-- ------------------------- -->
 
 | Category    | Needs Improvement                                                                                                | Satisfactory                                                                                                               |
-|-------------------|----------------------------|-------------------------|
+|--------------|----------------------------|-------------------------------|
 | Effort      | Some task **q**'s left unattempted                                                                               | All task **q**'s attempted                                                                                                 |
 | Observed    | Did not document observations, or observations incorrect                                                         | Documented correct observations based on analysis                                                                          |
 | Supported   | Some observations not clearly supported by analysis                                                              | All observations clearly supported by analysis (table, graph, etc.)                                                        |
@@ -122,13 +122,14 @@ You may encounter difficulties in visualizing these data; if so document your ch
 gapminder %>%
   filter(year == year_min) %>% 
   ggplot(aes(x = continent, y = gdpPercap)) +
-  geom_boxplot()
+  geom_boxplot() +
+  scale_y_log10()
 
 ```
 
 **Observations**:
 
--   Oceania appears to have the highest mean gdp per capita of any region followed by Europe and the Americas
+-   Oceania appears to have the highest median gdp per capita of any region followed by Europe and the Americas
 -   Asia has one extreme outline with a gdp over 105,000, many times higher than any other country. It also has at least one other much less extreme outlier.
 -   Europe has a least one outlier, the Americas have at leas three, and Africa has a dense clump very close to the end of the upper whisker. The ouliers in Africa are much less distinct. I am not sure if they should actually be counted as they are so close to the rest of the data?
 
@@ -149,19 +150,22 @@ gapminder %>%
 
 gdpPercap_1952_outliers <- 
   gapminder %>%
+  mutate(loggdpPercap = log(gdpPercap)) %>% 
   filter(year == year_min) %>% 
   group_by(continent) %>% 
-  filter(gdpPercap > (quantile(gdpPercap, 0.75) + 1.5*IQR(gdpPercap, na.rm = TRUE))) %>% 
+  filter(loggdpPercap > (quantile(loggdpPercap, 0.75) + 1.5*IQR(loggdpPercap, na.rm = TRUE))|(loggdpPercap < quantile(loggdpPercap, 0.25) - 1.5*IQR(loggdpPercap, na.rm = TRUE))) %>% 
   arrange(desc(continent))
 
 gdpPercap_1952_outliers
 
 gdpPercap_YearMax_outliers <- 
   gapminder %>%
+  mutate(loggdpPercap = log(gdpPercap)) %>% 
   filter(year == year_max) %>% 
   group_by(continent) %>% 
-  filter(gdpPercap > (quantile(gdpPercap, 0.75) + 1.5*IQR(gdpPercap, na.rm = TRUE))) %>% 
+  filter(loggdpPercap > (quantile(loggdpPercap, 0.75) + 1.5*IQR(loggdpPercap, na.rm = TRUE))|(loggdpPercap < quantile(loggdpPercap, 0.25) - 1.5*IQR(loggdpPercap, na.rm = TRUE))) %>% 
   arrange(desc(continent))
+
 
 #gdpPercap_YearMax_outliers
 
@@ -236,7 +240,8 @@ gapminder %>%
     size = 2
   ) + 
   # coord_flip() +
-  facet_wrap(vars(year))
+  facet_wrap(vars(year)) +
+  scale_y_log10()
 
 # coord_flip() +
 #   facet_wrap(vars(year), scales = "free_x")
@@ -261,6 +266,7 @@ Now it's your turn! We just went through guided EDA considering the GDP per capi
 ## TASK: Your first graph
 gapminder %>%
   ggplot(aes(x = year, y = gdpPercap, color = continent)) +
+  scale_y_log10() +
   geom_point() +
   geom_smooth()+
   geom_point(
@@ -276,9 +282,9 @@ gapminder %>%
 ```
 
 -   Kuwait continues to be an extreme outlier from the beginning of the data set in 1952 until it begins to decline in the mid seventies and rejoins the other high GDP contries around 1982. This decline corresponds with the oil crisis in the seventies.
--   The trend of the gdp in Oceania increased the most followed closely by Europe. 
+-   The trend of the gdp in Oceania increased the most followed closely by Europe.
 -   The trend in Asia and the Americas barely increased and Africa remained the lowest through out the data set
--  The GDPs of high GDP countries appear to have increased over time while the GDPs on the lower end of the spectrum remained relatively consistent   
+-   The GDPs of high GDP countries appear to have increased over time while the GDPs on the lower end of the spectrum remained relatively consistent
 
 ```{r q5-task2}
 ## TASK: Your second graph
@@ -290,11 +296,11 @@ gapminder %>%
 
 ```
 
--   The trends in life expectancy over time are relatively positive across all of the continents. 
+-   The trends in life expectancy over time are relatively positive across all of the continents.
 -   Oceania and Europe once again have the highest life expectancy over all.
 -   Life expectancy in Asia and the Americas appears to increase slightly more over time than the other continents
--   the trend of life expectancy increase in Africa appears to flatten out around the late 1980s this could be due in part to outliers. 
--   There is one notable low life expectancy outlier in Asia around 1977, and one in Africa around 1992.  
+-   the trend of life expectancy increase in Africa appears to flatten out around the late 1980s this could be due in part to outliers.
+-   There is one notable low life expectancy outlier in Asia around 1977, and one in Africa around 1992.
 
 ```{r q5-task3}
 ## TASK: Your third graph
@@ -336,11 +342,7 @@ gapminder %>%
 
 ```
 
-
 -   The life expectancy in Cambodia decreased significantly starting around 1967 and reaching its lowest, approximately 31 years old, around 1977. This corresponds with the Cambodian genocide that lasted from 1975 to 1979 killing between 1.5 and 3 million people (Wikipedia).
--   The genocide is also reflected as a dip in the the population data 
+-   The genocide is also reflected as a dip in the the population data
 -   The GDP also decreases starting around 1967 and reaching its lowest point around 1972 just before the genocide. I wonder why it appears to go up during the genocide? How reliable is this data?
 -   Because the data is taken every five years it is hard to get a clear picture of the true impact of the genocide especially on the population. If I where to continue this analysis I would use the year to year data.
-
-
-

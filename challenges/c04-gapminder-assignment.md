@@ -227,15 +227,16 @@ can.
 gapminder %>%
   filter(year == year_min) %>% 
   ggplot(aes(x = continent, y = gdpPercap)) +
-  geom_boxplot()
+  geom_boxplot() +
+  scale_y_log10()
 ```
 
 ![](c04-gapminder-assignment_files/figure-gfm/q2-task-1.png)<!-- -->
 
 **Observations**:
 
-- Oceania appears to have the highest mean gdp per capita of any region
-  followed by Europe and the Americas
+- Oceania appears to have the highest median gdp per capita of any
+  region followed by Europe and the Americas
 - Asia has one extreme outline with a gdp over 105,000, many times
   higher than any other country. It also has at least one other much
   less extreme outlier.
@@ -264,35 +265,32 @@ gapminder %>%
 
 gdpPercap_1952_outliers <- 
   gapminder %>%
+  mutate(loggdpPercap = log(gdpPercap)) %>% 
   filter(year == year_min) %>% 
   group_by(continent) %>% 
-  filter(gdpPercap > (quantile(gdpPercap, 0.75) + 1.5*IQR(gdpPercap, na.rm = TRUE))) %>% 
+  filter(loggdpPercap > (quantile(loggdpPercap, 0.75) + 1.5*IQR(loggdpPercap, na.rm = TRUE))|(loggdpPercap < quantile(loggdpPercap, 0.25) - 1.5*IQR(loggdpPercap, na.rm = TRUE))) %>% 
   arrange(desc(continent))
 
 gdpPercap_1952_outliers
 ```
 
-    ## # A tibble: 9 × 6
-    ## # Groups:   continent [4]
-    ##   country       continent  year lifeExp       pop gdpPercap
-    ##   <fct>         <fct>     <int>   <dbl>     <int>     <dbl>
-    ## 1 Switzerland   Europe     1952    69.6   4815000    14734.
-    ## 2 Bahrain       Asia       1952    50.9    120447     9867.
-    ## 3 Kuwait        Asia       1952    55.6    160000   108382.
-    ## 4 Canada        Americas   1952    68.8  14785584    11367.
-    ## 5 United States Americas   1952    68.4 157553000    13990.
-    ## 6 Venezuela     Americas   1952    55.1   5439568     7690.
-    ## 7 Angola        Africa     1952    30.0   4232095     3521.
-    ## 8 Gabon         Africa     1952    37.0    420702     4293.
-    ## 9 South Africa  Africa     1952    45.0  14264935     4725.
+    ## # A tibble: 3 × 7
+    ## # Groups:   continent [2]
+    ##   country       continent  year lifeExp       pop gdpPercap loggdpPercap
+    ##   <fct>         <fct>     <int>   <dbl>     <int>     <dbl>        <dbl>
+    ## 1 Kuwait        Asia       1952    55.6    160000   108382.        11.6 
+    ## 2 Canada        Americas   1952    68.8  14785584    11367.         9.34
+    ## 3 United States Americas   1952    68.4 157553000    13990.         9.55
 
 ``` r
 gdpPercap_YearMax_outliers <- 
   gapminder %>%
+  mutate(loggdpPercap = log(gdpPercap)) %>% 
   filter(year == year_max) %>% 
   group_by(continent) %>% 
-  filter(gdpPercap > (quantile(gdpPercap, 0.75) + 1.5*IQR(gdpPercap, na.rm = TRUE))) %>% 
+  filter(loggdpPercap > (quantile(loggdpPercap, 0.75) + 1.5*IQR(loggdpPercap, na.rm = TRUE))|(loggdpPercap < quantile(loggdpPercap, 0.25) - 1.5*IQR(loggdpPercap, na.rm = TRUE))) %>% 
   arrange(desc(continent))
+
 
 #gdpPercap_YearMax_outliers
 ```
@@ -373,7 +371,8 @@ gapminder %>%
     size = 2
   ) + 
   # coord_flip() +
-  facet_wrap(vars(year))
+  facet_wrap(vars(year)) +
+  scale_y_log10()
 ```
 
 ![](c04-gapminder-assignment_files/figure-gfm/q4-task-1.png)<!-- -->
@@ -411,6 +410,7 @@ the relationship between variables, or something else entirely.
 ## TASK: Your first graph
 gapminder %>%
   ggplot(aes(x = year, y = gdpPercap, color = continent)) +
+  scale_y_log10() +
   geom_point() +
   geom_smooth()+
   geom_point(
