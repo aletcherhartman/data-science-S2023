@@ -197,16 +197,22 @@ df_q1 <- tibble(
       x = runif(n, min = 0, max = 1),
       y = runif(n, min = 0, max = 1)
     ) %>%
-      mutate(in_A = (sqrt(x^2 + y^2) <= 1)) %>%
-      summarize(count_total = n(), count_A = sum(in_A), sd_A = sd(in_A), fr = mean(in_A))
+      mutate(in_A = (sqrt(x^2 + y^2) <= 1),
+             Api_est = in_A*4
+             ) %>%
+      summarize(count_total = n(),
+                count_A = sum(Api_est),
+                sd_A = sd(Api_est),
+                fr = mean(Api_est)
+                )
 #       #mutate(x = (x_norm >= 0 && x_norm <= 1)) # Generate the data
 df_q1
 ```
 
     ## # A tibble: 1 × 4
-    ##   count_total   count_A  sd_A    fr
-    ##         <int>     <int> <dbl> <dbl>
-    ## 1   800000000 628314670 0.411 0.785
+    ##   count_total    count_A  sd_A    fr
+    ##         <int>      <dbl> <dbl> <dbl>
+    ## 1   800000000 2513338220  1.64  3.14
 
 ### **q2** Using your data in `df_q1`, estimate $\pi$.
 
@@ -214,11 +220,11 @@ df_q1
 ## TASK: Estimate pi using your data from q1
 pi_est <- 
   df_q1 %>% 
-  pull(fr)*4
+  pull(fr)
 pi_est 
 ```
 
-    ## [1] 3.141573
+    ## [1] 3.141673
 
 ``` r
 pi # pi as defined by r
@@ -242,10 +248,10 @@ confidence = qnorm( 1 - (1 - 0.99) / 2 )
 df_q3  <-  
   df_q1 %>%
     mutate(
-      pi_est = fr*4,
-      se_pi = (sd_A*4) / sqrt(count_total),
-      lo_pi = (fr*4) - confidence * se_pi,
-      hi_pi = (fr*4) + confidence * se_pi,
+      pi_est = fr,
+      se_pi = (sd_A) / sqrt(count_total),
+      lo_pi = (fr) - confidence * se_pi,
+      hi_pi = (fr) + confidence * se_pi,
       flag = (lo_pi <= pi) & (pi <= hi_pi)
     )
 
@@ -253,27 +259,27 @@ df_q3
 ```
 
     ## # A tibble: 1 × 9
-    ##   count_total   count_A  sd_A    fr pi_est     se_pi lo_pi hi_pi flag 
-    ##         <int>     <int> <dbl> <dbl>  <dbl>     <dbl> <dbl> <dbl> <lgl>
-    ## 1   800000000 628314670 0.411 0.785   3.14 0.0000581  3.14  3.14 TRUE
+    ##   count_total    count_A  sd_A    fr pi_est     se_pi lo_pi hi_pi flag 
+    ##         <int>      <dbl> <dbl> <dbl>  <dbl>     <dbl> <dbl> <dbl> <lgl>
+    ## 1   800000000 2513338220  1.64  3.14   3.14 0.0000581  3.14  3.14 TRUE
 
 ``` r
 df_q3$pi_est
 ```
 
-    ## [1] 3.141573
+    ## [1] 3.141673
 
 ``` r
 df_q3$lo_pi 
 ```
 
-    ## [1] 3.141424
+    ## [1] 3.141523
 
 ``` r
 df_q3$hi_pi
 ```
 
-    ## [1] 3.141723
+    ## [1] 3.141822
 
 ``` r
 df_q3$flag

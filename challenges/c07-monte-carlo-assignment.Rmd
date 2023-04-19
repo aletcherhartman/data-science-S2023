@@ -24,7 +24,7 @@ Unlike exercises, **challenges will be graded**. The following rubrics define ho
 <!-- ------------------------- -->
 
 | Category    | Needs Improvement                                                                                                | Satisfactory                                                                                                               |
-|------------------|-----------------------------|-------------------------|
+|--------------|----------------------------|-------------------------------|
 | Effort      | Some task **q**'s left unattempted                                                                               | All task **q**'s attempted                                                                                                 |
 | Observed    | Did not document observations, or observations incorrect                                                         | Documented correct observations based on analysis                                                                          |
 | Supported   | Some observations not clearly supported by analysis                                                              | All observations clearly supported by analysis (table, graph, etc.)                                                        |
@@ -113,8 +113,14 @@ df_q1 <- tibble(
       x = runif(n, min = 0, max = 1),
       y = runif(n, min = 0, max = 1)
     ) %>%
-      mutate(in_A = (sqrt(x^2 + y^2) <= 1)) %>%
-      summarize(count_total = n(), count_A = sum(in_A), sd_A = sd(in_A), fr = mean(in_A))
+      mutate(in_A = (sqrt(x^2 + y^2) <= 1),
+             Api_est = in_A*4
+             ) %>%
+      summarize(count_total = n(),
+                count_A = sum(Api_est),
+                sd_A = sd(Api_est),
+                fr = mean(Api_est)
+                )
 #       #mutate(x = (x_norm >= 0 && x_norm <= 1)) # Generate the data
 df_q1
 ```
@@ -125,7 +131,7 @@ df_q1
 ## TASK: Estimate pi using your data from q1
 pi_est <- 
   df_q1 %>% 
-  pull(fr)*4
+  pull(fr)
 pi_est 
 pi # pi as defined by r
 ```
@@ -143,10 +149,10 @@ confidence = qnorm( 1 - (1 - 0.99) / 2 )
 df_q3  <-  
   df_q1 %>%
     mutate(
-      pi_est = fr*4,
-      se_pi = (sd_A*4) / sqrt(count_total),
-      lo_pi = (fr*4) - confidence * se_pi,
-      hi_pi = (fr*4) + confidence * se_pi,
+      pi_est = fr,
+      se_pi = (sd_A) / sqrt(count_total),
+      lo_pi = (fr) - confidence * se_pi,
+      hi_pi = (fr) + confidence * se_pi,
       flag = (lo_pi <= pi) & (pi <= hi_pi)
     )
 
