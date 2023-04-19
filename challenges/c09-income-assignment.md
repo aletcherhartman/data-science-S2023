@@ -528,7 +528,7 @@ df_data %>%
     position = position_dodge(width = wid)
   ) +
   geom_point(position = position_dodge(width = wid)) +
-
+  
   coord_flip() +
   labs(
     x = "County",
@@ -551,9 +551,8 @@ df_data %>%
   - …
 - Can you confidently distinguish between household incomes in Suffolk
   county? Why or why not?
-  - No, they are quite close together, it is very hard to distinguish
-    between the blue and green lines when they overlap, and the scale
-    markers on the x axis are too far apart to be useful in this case.
+  - No, the confidence intervals for each of the family sizes overlap so
+    there is no way to confidently distinguish between them.
 - Which counties have the widest confidence intervals?
   - Nantucket and Dukes overall and for 5 person families, followed by
     Hampshire and Berkshire for six person families.
@@ -575,15 +574,17 @@ df_data %>%
   ) %>%
 
   ggplot(aes(population_estimate, income_SE, color = county)) +
-  geom_line() +
+  geom_point() +
 
+  scale_y_log10() +
+  #scale_x_log10() +
   labs(
     x = "Population",
     y = "Income SE"
   )
 ```
 
-    ## Warning: Removed 2 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 2 rows containing missing values (`geom_point()`).
 
 ![](c09-income-assignment_files/figure-gfm/q7-task-1.png)<!-- -->
 
@@ -593,8 +594,8 @@ df_data %>%
   this trend exist?
   - Overall lower populations have larger and more variable SE in income
     estimates. This could be due to increased uncertainty with small
-    sample sizes and or with some smaller counties having more rich
-    people.
+    sample sizes and or with some smaller counties, such as Nantucket,
+    having much higher levels of income inequality.
 - What does this *overall* trend tell you about the relative ease of
   studying small vs large counties?
   - in general it is easier to study large counties because you have a
