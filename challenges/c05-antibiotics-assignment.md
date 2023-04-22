@@ -210,11 +210,12 @@ positive or negative.
 # WRITE YOUR CODE HERE
 
 df_antibiotic_long %>%
-  mutate(logMic = log(mic)) %>% 
+  #mutate(logMic = log(mic)) %>% 
   arrange(gram) %>% 
-  ggplot(aes(antibiotic, bacteria, fill = logMic, color = gram)) +
+  ggplot(aes(antibiotic, bacteria, fill = mic)) +
   geom_tile() +
-  theme_common()
+  scale_fill_continuous(trans = "log10") +
+  facet_wrap( ~gram)
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.1-1.png)<!-- -->
@@ -230,10 +231,10 @@ your other visuals.
 
 ``` r
 df_antibiotic_long %>%
-  mutate(logMic = log(mic)) %>% 
-  ggplot(aes(logMic, bacteria, color = antibiotic, shape = gram)) +
-  geom_point() +
-  theme_common()
+  ggplot(aes(mic, bacteria, fill = antibiotic)) +
+  geom_col(position = "dodge")+
+  facet_wrap( ~gram) +
+  scale_x_log10()
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.2-1.png)<!-- -->
@@ -252,14 +253,14 @@ your other visuals.
 df_antibiotic_long %>%
   mutate(HumanuseMic = na_if(mic, mic <= 0.1)) %>% 
   #filter(mic <= 0.1) %>% 
-  ggplot(aes(bacteria, HumanuseMic, fill = antibiotic, alpha = gram)) +
+  ggplot(aes(bacteria, HumanuseMic, fill = antibiotic)) + #, alpha = gram
   geom_col(position = "dodge") +
-  coord_flip()+
-  theme_common()+
+  #scale_alpha_discrete(range = c(0.4, 1)) +
+  coord_flip() +
+  facet_wrap( ~gram) +
+  #theme_common()+
   ylim(0, 0.1)
 ```
-
-    ## Warning: Using alpha for a discrete variable is not advised.
 
     ## Warning: Removed 29 rows containing missing values (`geom_col()`).
 
@@ -276,11 +277,13 @@ your other visuals.
 
 ``` r
 # WRITE YOUR CODE HERE
+wid <- 0.5
+
 df_antibiotic_long %>%
   #arrange(desc(mic)) %>% 
   ggplot(aes(mic, bacteria, color = antibiotic, shape = gram)) +
-  geom_point() +
-  theme_common()+
+  geom_point(position = position_dodge(width = wid)) +
+  #theme_common()+
   xlim(0, 0.1)
 ```
 
@@ -299,12 +302,56 @@ your other visuals.
 
 ``` r
 # WRITE YOUR CODE HERE
-df_antibiotic_long %>%
-  mutate(logMic = log(mic)) %>% 
-  arrange(desc(gram)) %>% 
-  ggplot(aes(gram, bacteria, fill = logMic)) +
-  geom_tile() +
-  theme_common()
+df_antibiotics
+```
+
+    ## # A tibble: 16 × 5
+    ##    bacteria                        penicillin streptomycin neomycin gram    
+    ##    <chr>                                <dbl>        <dbl>    <dbl> <chr>   
+    ##  1 Aerobacter aerogenes               870             1       1.6   negative
+    ##  2 Brucella abortus                     1             2       0.02  negative
+    ##  3 Bacillus anthracis                   0.001         0.01    0.007 positive
+    ##  4 Diplococcus pneumonia                0.005        11      10     positive
+    ##  5 Escherichia coli                   100             0.4     0.1   negative
+    ##  6 Klebsiella pneumoniae              850             1.2     1     negative
+    ##  7 Mycobacterium tuberculosis         800             5       2     negative
+    ##  8 Proteus vulgaris                     3             0.1     0.1   negative
+    ##  9 Pseudomonas aeruginosa             850             2       0.4   negative
+    ## 10 Salmonella (Eberthella) typhosa      1             0.4     0.008 negative
+    ## 11 Salmonella schottmuelleri           10             0.8     0.09  negative
+    ## 12 Staphylococcus albus                 0.007         0.1     0.001 positive
+    ## 13 Staphylococcus aureus                0.03          0.03    0.001 positive
+    ## 14 Streptococcus fecalis                1             1       0.1   positive
+    ## 15 Streptococcus hemolyticus            0.001        14      10     positive
+    ## 16 Streptococcus viridans               0.005        10      40     positive
+
+``` r
+df_antibiotics %>%
+  ggplot(aes(neomycin, penicillin, color = bacteria, shape = gram)) +
+  geom_point() + 
+  # geom_text(
+  #    aes(label = bacteria),
+  #    
+  #    nudge_x = 0.05,
+  #    #hjust = 0, 
+  #    nudge_y = 0.5
+  #   # label = 'bacteria',
+  #   #check_overlap = TRUE
+  #   ) +
+  # geom_label(
+  #   aes(label = bacteria), 
+  #   # position = "doge",
+  #   nudge_x = .5,
+  #   nudge_y = .5,
+  #   size = 3,
+  #   label.padding = unit(0, "lines"),
+  #   label.r = unit(0, "lines"),
+  #   label.size = 0,
+  #   show.legend = FALSE
+  # #            ) +
+  # theme(legend.position = "none")+
+  scale_x_log10() +
+  scale_y_log10()
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.5-1.png)<!-- -->
@@ -330,20 +377,22 @@ opportunity to think about why this is.**
 > and neomycin
 
 *Observations* - What is your response to the question above? -
-streptomycin is effective in treating humans against only 3 bacteria in
-this data set all of witch are gram positive. Outside of treating humans
-has a mid range effectiveness. Neomycin is effective in treating humans
-against 9 bacteria in this data set, 5 gram negative and 4 gram
-positive, the largest number of any antibiotic. Penicillin had the
-widest spread of effectiveness with the highest and lowest mic. It is
-effective in treating humans against 5 gram positive bacteria in this
-data set.
+streptomycin is effective in treating humans against only 4 bacteria in
+this data set 3 of witch are gram positive and 1 gram negative. Outside
+of treating humans it has a mid range effectiveness. Neomycin is
+effective in treating humans against 9 bacteria in this data set, 5 gram
+negative and 4 gram positive, the largest number of any antibiotic.
+Penicillin had the widest spread of effectiveness with the highest and
+lowest mic. It is effective in treating humans against 6 gram positive
+bacteria in this data set.
 
 \- Which of your visuals above (1 through 5) is **most effective** at
 helping to answer this question? - 2 and 4
 
 - Why? - two helped me see the bigger picture and four made it easy to
-  see how effective they actually were in humans
+  see how effective they actually were in humans since I limited it to
+  showmic only mic values at or under the effectiveness threshold for
+  humans
 
 #### Guiding Question 2
 
@@ -354,17 +403,19 @@ and in 1984 *Streptococcus fecalis* was renamed *Enterococcus fecalis*
 > Why was *Diplococcus pneumoniae* was renamed *Streptococcus
 > pneumoniae*?
 
-*Observations* - What is your response to the question above? - I am not
-sure that we have enough information to anser this question, I don’t
-totally understand what the change means even after googling, but from
-looking at my graphs it seems like it might have been renamed because it
-is gram negative? or because panicillin has a similar amount of
-effectiveness on it compare to other strepto caucouse?
+*Observations* - What is your response to the question above? - In
+figure five you can see that Diplococcus pneumoniae is clustered with
+all of the *Streptococcus* bacteria, except Streptococcus fecalis,
+having a low mic for penicilin and a high mic for neomicin. Where as
+Streptococcus fecalis is closer to a cluster of gram negative bacteria
+with mid range mic for both antibiotics.
 
 \- Which of your visuals above (1 through 5) is **most effective** at
-helping to answer this question? - (Write your response here) 5 and 4
+helping to answer this question? - 5
 
-\- Why? - five very clearly shows gram positive vs gram negative
+\- Why? - five very clearly shows how most similar bacteria have similar
+reactions to penicillin and neomicin with the notable exception of these
+two bacteria
 
 References
 
