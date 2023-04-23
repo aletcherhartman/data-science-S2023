@@ -377,8 +377,8 @@ df_norm_sim <-
 
     ## Rows: 10,000,000
     ## Columns: 2
-    ## $ strength <dbl> 39220.08, 39578.99, 40174.93, 39907.32, 39884.16, 39888.14, 3…
-    ## $ g        <dbl> 4.396912, 363.306502, 959.244619, 691.634547, 668.473490, 672…
+    ## $ strength <dbl> 39173.47, 40173.38, 39692.84, 40154.45, 39466.98, 40010.97, 3…
+    ## $ g        <dbl> -42.22076, 957.69157, 477.15227, 938.76062, 251.28987, 795.28…
 
 ``` r
 ## NOTE: The following code estimates the POF and a 95% confidence interval
@@ -393,7 +393,7 @@ df_norm_pof <-
     pof_lo = pof_est - 1.96 * se,
     pof_hi = pof_est + 1.96 * se
   ) %>%
-  select(pof_lo, pof_est, pof_hi)
+  dplyr::select(pof_lo, pof_est, pof_hi)
 
 df_norm_pof
 ```
@@ -401,14 +401,13 @@ df_norm_pof
     ## # A tibble: 1 × 3
     ##   pof_lo pof_est pof_hi
     ##    <dbl>   <dbl>  <dbl>
-    ## 1 0.0183  0.0183 0.0184
+    ## 1 0.0182  0.0183 0.0184
 
 - Assuming your scopus is the probability of failure `POF` defined
   above, does your estimate exhibit real variability, induced
   variability, or both?
-  - Both, real variability from the measured strength values used to
-    generate the distribution and induced variability form the Monte
-    Carlo approximation.
+  - Induced variability form the Monte Carlo approximation. The POF can
+    not have real variability because it is a fixed constant.
 - Does this confidence interval imply that `POF < 0.03`?
   - Yes
 - Compare this probability with your estimate from q2; is it more or
@@ -417,10 +416,11 @@ df_norm_pof
     and it is not zero like my last one.
 - Does the confidence interval above account for uncertainty arising
   from the *Monte Carlo approximation*? Why or why not?
-  - No? the confidence interval helps but not totaly
+  - Yes, it is constructed to account for the variability in the Monte
+    Carlo approximation
 - Does the confidence interval above account for uncertainty arising
   from *limited physical tests* (`df_samples`)? Why or why not?
-  - No? or yes using the monty carlow approximation?
+  - Yes using the Monte Carlo approximation
 - What could you do to tighten up the confidence interval?
   - you could increase the number of samples?
 - Can you *confidently* conclude that `POF < 0.03`? Why or why not?
@@ -496,16 +496,16 @@ df_samples %>% estimate_pof()
   - No, because it is not using a Monte Carlo approximation.
 - With the scopus as the `POF`, would uncertainty due to *Monte Carlo
   approximation* be induced or real?
-  - I am confused I thought we were not using MC? Induced bc we are
-    generating the uncertainty within the model by doing monte carlo?
+  - I am confused I thought we were not using MC? Induced because we are
+    generating the uncertainty within the model by doing monte carlo.
 - Does this estimate have any uncertainty due to *limited physical
   tests*? Why or why not?
   - Yes because we are fitting our distribution to the physical test
     data
 - With the scopus as the `POF`, would uncertainty due to *limited
   physical tests* be induced or real?
-  - real, because it comes from real uncertainty in the measured data
-    and variation from the manufacturing processes.
+  - Induced, the POF can not have real variation because it is a fixed
+    constant. The variability is induced from limited information.
 
 ## Quantifying sampling uncertainty
 
@@ -539,7 +539,7 @@ df_samples %>%
     ## # A tibble: 1 × 6
     ##   term   .lower .estimate .upper .alpha .method   
     ##   <chr>   <dbl>     <dbl>  <dbl>  <dbl> <chr>     
-    ## 1 pof   0.00125    0.0182 0.0488   0.05 percentile
+    ## 1 pof   0.00129    0.0184 0.0484   0.05 percentile
 
 **Observations**:
 
@@ -549,7 +549,6 @@ df_samples %>%
     above
 - Does the confidence interval above account for uncertainty arising
   from *limited physical tests* (`df_samples`)? Why or why not?
-  - i think id does a better job by pulling multiple samples but it can
-    still only base its estimate on the data the model is based on.
+  - Yes, the bootstrap is used to account for that uncertainty.
 - Can you confidently conclude that `POF < 0.03`? Why or why not?
   - No, the upper bound of the confidence interval is 0.049.

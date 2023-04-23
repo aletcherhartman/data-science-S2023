@@ -26,7 +26,7 @@ Unlike exercises, **challenges will be graded**. The following rubrics define ho
 <!-- ------------------------- -->
 
 | Category    | Needs Improvement                                                                                                | Satisfactory                                                                                                               |
-|------------------|-----------------------------|-------------------------|
+|--------------|----------------------------|-------------------------------|
 | Effort      | Some task **q**'s left unattempted                                                                               | All task **q**'s attempted                                                                                                 |
 | Observed    | Did not document observations, or observations incorrect                                                         | Documented correct observations based on analysis                                                                          |
 | Supported   | Some observations not clearly supported by analysis                                                              | All observations clearly supported by analysis (table, graph, etc.)                                                        |
@@ -88,7 +88,7 @@ df_samples %>%
 -   To what extent can you tell what shape the distribution of the data has?
     -   not very clearly, there are more samples with lower strength values with most of them concentrated around 40000, they then taper off towards 41000, (it looks a bit like a weibull distribution of you squint)
 -   Assuming the scopus is the strength of an individual part made from this aluminum alloy, is the observed variability real or induced?
-    -   It is likely a combination of both. Real variation from the manufacturing process and induced from the experimental procedure (though above it did say that "The experiments were carried out following the higest standards of experimental rigor, so you should consider these values to be the "true" breaking strength for each sample." so maybe tat means there is no induced variability?)
+    -   It is likely a combination of both. Real variation from the manufacturing process and induced from the experimental procedure (though above it did say that "The experiments were carried out following the higest standards of experimental rigor, so you should consider these values to be the"true" breaking strength for each sample." so maybe tat means there is no induced variability?)
 
 # Assessing Structural Safety
 
@@ -221,25 +221,25 @@ df_norm_pof <-
     pof_lo = pof_est - 1.96 * se,
     pof_hi = pof_est + 1.96 * se
   ) %>%
-  select(pof_lo, pof_est, pof_hi)
+  dplyr::select(pof_lo, pof_est, pof_hi)
 
 df_norm_pof
 ```
 
 -   Assuming your scopus is the probability of failure `POF` defined above, does your estimate exhibit real variability, induced variability, or both?
-    -   Both, real variability from the measured strength values used to generate the distribution and induced variability form the Monte Carlo approximation.
+    -   Induced variability form the Monte Carlo approximation. The POF can not have real variability because it is a fixed constant.
 -   Does this confidence interval imply that `POF < 0.03`?
     -   Yes
 -   Compare this probability with your estimate from q2; is it more or less trustworthy?
     -   I think it is more trust worthy it used a much larger sample size and it is not zero like my last one.
 -   Does the confidence interval above account for uncertainty arising from the *Monte Carlo approximation*? Why or why not?
-    -   No? the confidence interval helps but not totaly
+    -   Yes, it is constructed to account for the variability in the Monte Carlo approximation
 -   Does the confidence interval above account for uncertainty arising from *limited physical tests* (`df_samples`)? Why or why not?
-    -   No? or yes using the monty carlow approximation?
+    -   Yes using the Monte Carlo approximation
 -   What could you do to tighten up the confidence interval?
     -   you could increase the number of samples?
 -   Can you *confidently* conclude that `POF < 0.03`? Why or why not?
-    -    no, I was able to arbitrarily narrow my confidence interval by increasing the number points in the sample
+    -   no, I was able to arbitrarily narrow my confidence interval by increasing the number points in the sample
 
 ## A different way to compute the POF
 
@@ -296,11 +296,11 @@ df_samples %>% estimate_pof()
 -   Does this estimate have any uncertainty due to *Monte Carlo approximation*? Why or why not?
     -   No, because it is not using a Monte Carlo approximation.
 -   With the scopus as the `POF`, would uncertainty due to *Monte Carlo approximation* be induced or real?
-    -   I am confused I thought we were not using MC? Induced bc we are generating the uncertainty within the model by doing monte carlo?
+    -   I am confused I thought we were not using MC? Induced because we are generating the uncertainty within the model by doing monte carlo.
 -   Does this estimate have any uncertainty due to *limited physical tests*? Why or why not?
     -   Yes because we are fitting our distribution to the physical test data
 -   With the scopus as the `POF`, would uncertainty due to *limited physical tests* be induced or real?
-    -   real, because it comes from real uncertainty in the measured data and variation from the manufacturing processes.
+    -   Induced, the POF can not have real variation because it is a fixed constant. The variability is induced from limited information.
 
 ## Quantifying sampling uncertainty
 
@@ -330,6 +330,6 @@ df_samples %>%
 -   Does the confidence interval above account for uncertainty arising from *Monte Carlo approximation* of the POF? Why or why not?
     -   yes pl norm gets rid of uncertainty from random sampling as stated above
 -   Does the confidence interval above account for uncertainty arising from *limited physical tests* (`df_samples`)? Why or why not?
-    -   i think id does a better job by pulling multiple samples but it can still only base its estimate on the data the model is based on.
+    -   Yes, the bootstrap is used to account for that uncertainty.
 -   Can you confidently conclude that `POF < 0.03`? Why or why not?
     -   No, the upper bound of the confidence interval is 0.049.
