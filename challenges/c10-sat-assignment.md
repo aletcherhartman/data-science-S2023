@@ -286,14 +286,30 @@ df_composite
 ## TODO:
 coef <- 400
 
+# df_composite %>%
+#  
+#   ggplot() +
+#     geom_point(aes(x = univ_GPA, y = high_GPA))+
+#     geom_point(aes(x = univ_GPA, y = both_SAT/coef, color = "#69b3a2")) +
+#    
+#     # Custom the Y scales:
+#     scale_y_continuous(
+#      
+#       # Features of the first axis
+#       name = "High school GPA",
+#      
+#       # Add a second axis and specify its features
+#       sec.axis = sec_axis( trans = ~.*coef, name = "SAT Score")
+#     )
+
 df_composite %>%
  
   ggplot() +
-    geom_point(aes(x = univ_GPA, y = high_GPA))+
-    geom_point(aes(x = univ_GPA, y = both_SAT/coef, color = "#69b3a2")) +
+    geom_point(aes(x = high_GPA, y = univ_GPA))+
+    geom_point(aes(x = both_SAT/coef, y = univ_GPA, color = "#69b3a2")) +
    
     # Custom the Y scales:
-    scale_y_continuous(
+    scale_x_continuous(
      
       # Features of the first axis
       name = "High school GPA",
@@ -417,8 +433,10 @@ cor.test(x = x2, y = y)
   - both
 - Which of `high_GPA` and `both_SAT` seems to be more strongly
   correlated with `univ_GPA`?
-  - high_GPA has a stronger correlation, approximately 0.78, according
-    to corr.test
+  - high_GPA appears to have a stronger correlation, approximately 0.78
+    according to corr.test, but the lower bound of its confidence
+    interval overlaps with the upper bound of both_SATs confidence
+    interval so we can not say for certain which is higher.
 - How do the results here compare with the visual you created in q2?
   - they seem a bit higher than I was expecting but generally in line
     with what I thought
@@ -453,7 +471,7 @@ bootstraps(df_composite, 1000, apparent = TRUE) %>%
     ## # A tibble: 1 × 6
     ##   term  .lower .estimate .upper .alpha .method   
     ##   <chr>  <dbl>     <dbl>  <dbl>  <dbl> <chr>     
-    ## 1 corr   0.692     0.780  0.851   0.05 percentile
+    ## 1 corr   0.694     0.780  0.852   0.05 percentile
 
 **Observations**:
 
@@ -590,8 +608,8 @@ rsquare(fit_basic, df_validate)
 - What is the confidence interval on the coefficient of `both_SAT`? Is
   this coefficient significantly different from zero?
   - the confidence interval is between approximately 0.0017 and 0.0034,
-    the coefficient is approximately 0.0025 which is relatively close to
-    zero.
+    the coefficient is approximately 0.0025 which is significantly
+    different from zero.
 - By itself, how well does `both_SAT` predict `univ_GPA`?
   - It doesn’t do a very good job. The r squared value with the training
     data is around 0.45 and the validation data is around 0.54.
@@ -739,11 +757,12 @@ rsquare(fit_highgpa, df_validate)
   including `high_GPA` as a predictor?? Is this coefficient
   significantly different from zero?
   - the confidence interval is between approximately -0.00067 and
-    0.00174, the coefficient is approximately 0.00053 which is much
-    closer to zero than even the first model.
+    0.00174, the coefficient is approximately 0.00053 which is not
+    significantly different from zero.
 - How do the hypothesis test results compare with the results in q6?
-  - high_GPA firmly refutes our null hypothesis while the coefficient
-    for both_SAT gets even closer to the null hypothesis.
+  - high_GPA firmly refutes our null hypothesis while the confidence
+    interval for both_SAT includes zero and fails to refute the null
+    hypothesis.
 
 ## Synthesize
 
