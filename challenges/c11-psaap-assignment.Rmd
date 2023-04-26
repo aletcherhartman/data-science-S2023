@@ -10,24 +10,35 @@ output:
 *Purpose*: Confidence and prediction intervals are useful for studying "pure sampling" of some distribution. However, we can combine CI and PI with regression analysis to equip our modeling efforts with powerful notions of uncertainty. In this challenge, you will use fluid simulation data in a regression analysis with uncertainty quantification (CI and PI) to support engineering design.
 
 <!-- include-rubric -->
+
 # Grading Rubric
+
 <!-- -------------------------------------------------- -->
 
 Unlike exercises, **challenges will be graded**. The following rubrics define how you will be graded, both on an individual and team basis.
 
 ## Individual
+
 <!-- ------------------------- -->
 
-| Category | Needs Improvement | Satisfactory |
-|----------|----------------|--------------|
-| Effort | Some task __q__'s left unattempted | All task __q__'s attempted |
-| Observed | Did not document observations, or observations incorrect | Documented correct observations based on analysis |
-| Supported | Some observations not clearly supported by analysis | All observations clearly supported by analysis (table, graph, etc.) |
-| Assessed | Observations include claims not supported by the data, or reflect a level of certainty not warranted by the data | Observations are appropriately qualified by the quality & relevance of the data and (in)conclusiveness of the support |
-| Specified | Uses the phrase "more data are necessary" without clarification | Any statement that "more data are necessary" specifies which *specific* data are needed to answer what *specific* question |
-| Code Styled | Violations of the [style guide](https://style.tidyverse.org/) hinder readability | Code sufficiently close to the [style guide](https://style.tidyverse.org/) |
++-------------+------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| Category    | Needs Improvement                                                                                                | Satisfactory                                                                                                               |
++=============+==================================================================================================================+============================================================================================================================+
+| Effort      | Some task **q**'s left unattempted                                                                               | All task **q**'s attempted                                                                                                 |
++-------------+------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| Observed    | Did not document observations, or observations incorrect                                                         | Documented correct observations based on analysis                                                                          |
++-------------+------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| Supported   | Some observations not clearly supported by analysis                                                              | All observations clearly supported by analysis (table, graph, etc.)                                                        |
++-------------+------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| Assessed    | Observations include claims not supported by the data, or reflect a level of certainty not warranted by the data | Observations are appropriately qualified by the quality & relevance of the data and (in)conclusiveness of the support      |
++-------------+------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| Specified   | Uses the phrase "more data are necessary" without clarification                                                  | Any statement that "more data are necessary" specifies which *specific* data are needed to answer what *specific* question |
++-------------+------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| Code Styled | Violations of the [style guide](https://style.tidyverse.org/) hinder readability                                 | Code sufficiently close to the [style guide](https://style.tidyverse.org/)                                                 |
++-------------+------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
 
 ## Due Date
+
 <!-- ------------------------- -->
 
 All the deliverables stated in the rubrics above are due **at midnight** before the day of the class discussion of the challenge. See the [Syllabus](https://docs.google.com/document/d/1qeP6DUS8Djq_A0HMllMqsSqX3a9dbcx1/edit?usp=sharing&ouid=110386251748498665069&rtpof=true&sd=true) for more information.
@@ -64,18 +75,25 @@ unzip(filename_zip, exdir = "./data")
 df_psaap <- read_csv(filename_psaap)
 ```
 
-![PSAAP II irradiated core flow](./images/psaap-setup.png)
-Figure 1. An example simulation, frozen at a specific point in time. An initial simulation is run (HIT SECTION) to generate a turbulent flow with particles, and that swirling flow is released into a rectangular domain (RADIATED SECTION) with bulk downstream flow (left to right). Concentrated solar radiation transmits through the optically transparent fluid, but deposits heat into the particles. The particles then convect heat into the fluid, which heats up the flow. The false-color image shows the fluid temperature: Notice that there are "hot spots" where hot particles have deposited heat into the fluid. The dataset `df_psaap` gives measurements of `T_norm = (T - T0) / T0` averaged across planes at various locations along the RADIATED SECTION.
+![PSAAP II irradiated core flow](./images/psaap-setup.png) Figure 1. An example simulation, frozen at a specific point in time. An initial simulation is run (HIT SECTION) to generate a turbulent flow with particles, and that swirling flow is released into a rectangular domain (RADIATED SECTION) with bulk downstream flow (left to right). Concentrated solar radiation transmits through the optically transparent fluid, but deposits heat into the particles. The particles then convect heat into the fluid, which heats up the flow. The false-color image shows the fluid temperature: Notice that there are "hot spots" where hot particles have deposited heat into the fluid. The dataset `df_psaap` gives measurements of `T_norm = (T - T0) / T0` averaged across planes at various locations along the RADIATED SECTION.
 
-### __q1__ Perform your "initial checks" to get a sense of the data.
+### **q1** Perform your "initial checks" to get a sense of the data.
 
 ```{r q1-task}
 ## TODO: Perform your initial checks
+df_psaap
+glimpse(df_psaap)
+summary(df_psaap)
+df_psaap %>% 
+  filter(idx == 10) %>% 
+  summary()
 ```
 
 **Observations**:
 
-- (Take notes here!)
+-   all of the data is numeric
+-   the output metrics for each simulation, 1 - 35, are calculated at each x value along the tunnel
+-   the inputs remain the same for each simulation regardless of x value
 
 The important variables in this dataset are:
 
@@ -106,12 +124,19 @@ The important variables in this dataset are:
 
 The primary output of interest is `T_norm = (avg_T - T_f) / T_f`, the normalized (dimensionless) temperature rise of the fluid, due to heat transfer. These measurements are taken at locations `x` along a column of fluid, for different experimental settings (e.g. different dimensions `W, L`, different flow speeds `U_0`, etc.).
 
-### __q2__ Visualize `T_norm` against `x`. Note that there are multiple simulations at different values of the Input variables: Each simulation result is identified by a different value of `idx`.
+### **q2** Visualize `T_norm` against `x`. Note that there are multiple simulations at different values of the Input variables: Each simulation result is identified by a different value of `idx`.
 
 ```{r q2-task}
 ## TODO: Visualize the data in df_psaap with T_norm against x;
 ##       design your visual to handle the multiple simulations,
 ##       each identified by different values of idx
+
+df_psaap %>% 
+  ggplot(aes(x, T_norm, color = as.factor(idx))) +
+  geom_point() +
+  geom_line(aes(group = idx)) 
+# +
+#   facet_wrap(~idx)
 ```
 
 ## Modeling
@@ -130,7 +155,7 @@ One of the key decisions we must make in modeling is choosing predictors (featur
 
 Reasoning about our variables---at least at a *high level*---can help us to avoid including *fallacious* predictors in our models. You'll explore this idea in the next task.
 
-### __q3__ The following code chunk fits a few different models. Compute a measure of model accuracy for each model on `df_validate`, and compare their performance.
+### **q3** The following code chunk fits a few different models. Compute a measure of model accuracy for each model on `df_validate`, and compare their performance.
 
 ```{r q3-task}
 ## NOTE: No need to edit these models
@@ -148,25 +173,76 @@ fit_nonphysical <-
 
 ## TODO: Compute a measure of accuracy for each fit above;
 ##       compare their relative performance
+# Baseline
+#MSE
+mse(fit_baseline, df_train)
+mse(fit_baseline, df_validate)
+#Rsquared
+rsquare(fit_baseline, df_train)
+rsquare(fit_baseline, df_validate)
+
+```
+
+```{r}
+# cheet
+#MSE
+mse(fit_cheat, df_train)
+mse(fit_cheat, df_validate)
+#Rsquared
+rsquare(fit_cheat, df_train)
+rsquare(fit_cheat, df_validate)
+
+```
+
+```{r}
+# nonphysical
+#MSE
+mse(fit_nonphysical, df_train)
+mse(fit_nonphysical, df_validate)
+#Rsquared
+rsquare(fit_nonphysical, df_train)
+rsquare(fit_nonphysical, df_validate)
 ```
 
 **Observations**:
 
-- Which model is *most accurate*? Which is *least accurate*?
-  - (Your response here)
-- What *Category* of variable is `avg_T`? Why is it such an effective predictor?
-  - (Your response here)
-- Would we have access to `avg_T` if we were trying to predict a *new* value of `T_norm`? Is `avg_T` a valid predictor?
-  - (Your response here)
-- What *Category* of variable is `idx`? Does it have any physical meaning?
-  - (Your response here)
+-   Which model is *most accurate*? Which is *least accurate*?
+    -   the non physical model is the least accurate the cheet model is the most accurate
+-   What *Category* of variable is `avg_T`? Why is it such an effective predictor?
+    -   Output, T norm is derived from avg_T making it a very good predictor
+-   Would we have access to `avg_T` if we were trying to predict a *new* value of `T_norm`? Is `avg_T` a valid predictor?
+    -   assuming we are not running any new simulations we would not have access to any new values of avg_T so it is not a valid predictor
+-   What *Category* of variable is `idx`? Does it have any physical meaning?
+    -   Metadata, it has no physical meaning but it is likely that the simulations where done in some order where they systematical changed variables as they went.
 
-### __q4__ Use a combination of EDA and train-validation error to build a model by selecting *reasonable* predictors for the `formula` argument. Document your findings under *observations* below. Try to build the most accurate model you can!
+### **q4** Use a combination of EDA and train-validation error to build a model by selecting *reasonable* predictors for the `formula` argument. Document your findings under *observations* below. Try to build the most accurate model you can!
 
 ```{r q4-task}
 ## TODO: Fit a model for T_norm using only *principled* predictors, try to
 ##       optimize your validation error.
-fit_q4 <- NA
+fit_q4 <- 
+  df_train %>% 
+  lm(formula = T_norm ~ x + W + L + U_0 + d_p + I_0) # + W + L + U_0 + d_p + I_0
+# x + W + L + U_0 + d_p + rho_f + I_0 + k_f
+# [1] 0.9073578
+# [1] 0.6903052
+
+df_psaap %>%
+  add_predictions(fit_q4, var = "T_norm_pred") %>%
+  group_by(idx) %>%
+
+  ggplot(aes(x, T_norm)) +
+  geom_line(aes(y = T_norm_pred, color = "Predicted", group = idx)) +
+  geom_line(
+    data = df_train %>% mutate(source = "Train"),
+    mapping = aes(y = T_norm, color = source, group = idx, alpha = 0.4)
+  ) +
+  geom_line(
+    data = df_validate %>% mutate(source = "Validate"),
+    mapping = aes(y = T_norm, color = source, group = idx, alpha = 0.4)
+  ) +
+
+  scale_color_discrete(name = "Data")
 
 ## NOTE: No need to change these error calculations; use them to
 ##       help define your model
@@ -174,10 +250,91 @@ rsquare(fit_q4, df_train)
 rsquare(fit_q4, df_validate)
 ```
 
++-------------+----------------------------------+------------------------------------+----------------+
+| Variable    | Meaning                          | single r squared [train, validate] | x+ \_ rsquared |
++=============+==================================+====================================+================+
+| `x`         | Channel location                 | 0.3483764, 0.4746546               | NA             |
++-------------+----------------------------------+------------------------------------+----------------+
+| `L`         | Channel length                   | 0.05405259, 0.06779214             | 0.4024289      |
+|             |                                  |                                    |                |
+|             |                                  |                                    | [1] 0.5424467  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `W`         | Channel width                    | 0.1854643, 0.02360117              | 0.5338406      |
+|             |                                  |                                    |                |
+|             |                                  |                                    | [1] 0.4982557  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `U_0`       | Bulk velocity                    | 0.09519208, 0.05886415             | 0.4435684      |
+|             |                                  |                                    |                |
+|             |                                  |                                    | [1] 0.5335187  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `N_p`       | Number of particles              | 0.07431324, -0.2606784             | 0.4226896      |
+|             |                                  |                                    |                |
+|             |                                  |                                    | [1] 0.2139762  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `k_f`       | Turbulence level                 | 0.0001301951, 0.002741812          | 0.3485065      |
+|             |                                  |                                    |                |
+|             |                                  |                                    | [1] 0.4773964  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `T_f`       | Fluid inlet temp                 | 0.1133939, -0.02174533             | 0.4617702      |
+|             |                                  |                                    |                |
+|             |                                  |                                    | [1] 0.4529092  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `rho_f`     | Fluid density                    | 0.02407702                         | 0.3724534      |
+|             |                                  |                                    |                |
+|             |                                  | [1] 0.04759684                     | [1] 0.5222514  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `mu_f`      | Fluid viscosity                  | 0.01176948                         | 0.3601458      |
+|             |                                  |                                    |                |
+|             |                                  | [1] -0.02159179                    | [1] 0.4530628  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `lam_f`     | Fluid conductivity               | 0.08846712                         | 0.4368435      |
+|             |                                  |                                    |                |
+|             |                                  | [1] -0.2442081                     | [1] 0.2304464  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `C_fp`      | Fluid isobaric heat capacity     | 0.2105467                          | 0.5589231      |
+|             |                                  |                                    |                |
+|             |                                  | [1] -0.2130444                     | [1] 0.2616102  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `rho_p`     | Particle density                 | 0.09061531                         | 0.4389917      |
+|             |                                  |                                    |                |
+|             |                                  | [1] -0.1530723                     | [1] 0.3215822  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `d_p`       | Particle diameter                | 0.03856626                         | 0.3869426      |
+|             |                                  |                                    |                |
+|             |                                  | [1] 0.1334625                      | [1] 0.6081171  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `C_pv`      | Particle isochoric heat capacity | 0.01826456                         | 0.3666409      |
+|             |                                  |                                    |                |
+|             |                                  | [1] -0.0003554925                  | [1] 0.4742991  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `h`         | Convection coefficient           | 0.02700318                         | 0.3753795      |
+|             |                                  |                                    |                |
+|             |                                  | [1] -0.0893628                     | [1] 0.3852918  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `I_0`       | Radiation intensity              | 0.2839261                          | 0.6323025      |
+|             |                                  |                                    |                |
+|             |                                  | [1] -0.2825293                     | [1] 0.1921253  |
++-------------+----------------------------------+------------------------------------+----------------+
+| `eps_p`     | Radiation absorption coefficient | 0.007900774                        | 0.3562771      |
+|             |                                  |                                    |                |
+|             |                                  | [1] -0.07697011                    | [1] 0.3976844  |
++-------------+----------------------------------+------------------------------------+----------------+
+
 **Observations**:
 
-- (Use this space to document which predictors seem useful.)
-- *Note*: You don't just have to fiddle with `formula`! Remember that you have a whole toolkit of *EDA* tools
+-   because each output is calculated at each x value, and all other inputs are constant for each simulation, x is the best single predictor
+
+-   other than x for single variable models the only variables with positive r squared values for both df train and validate are Particle diameter, Fluid density, Turbulence level, Bulk velocity, and the length and width. when all of these where used as predictors together they did not have a particularity high or balanced r squared values with df_train r squared = 0.8127419, and df_validate r squared = 0.5323567
+
+-   when i switched turbulence level with io df_train r squared = 0.8957414, and df_validate r squared = 0.7493398
+
+-   my model consists of the geometric variables X, W, and L as well as, Particle diameter, Bulk velocity, and Radiation intensity. I included radiation intensity because it seemed like a highly relevant variable to predicting how much something would heat up from the sun.
+
+-   I chose this model because it had good and relatively balanced r squared values between the train and validate data. In my model df_train r squared = 0.8792808, and df_validate r squared = 0.7846579
+
+-   when combined with the other predictors in my model both turbulence level and Fluid density increased the r squared of the train data but decreased it for the validate data so I chose to exclude them.
+
+-   *Note*: You don't just have to fiddle with `formula`! Remember that you have a whole toolkit of *EDA* tools
 
 ## Contrasting CI and PI
 
@@ -200,7 +357,7 @@ The following figure visualizes the regression CI and PI against the objects the
 ```{r data-simple-model-vis}
 ## NOTE: No need to edit this chunk
 df_intervals %>%
-  select(T_norm, x, matches("ci|pi")) %>%
+  dplyr::select(T_norm, x, matches("ci|pi")) %>%
   pivot_longer(
     names_to = c("method", ".value"),
     names_sep = "_",
@@ -238,14 +395,14 @@ Under the `ci` facet we have the regression confidence intervals and the mean tr
 
 **Punchline**:
 
-- Confidence intervals are meant to capture the *mean trend*
-- Prediction intervals are meant to capture *new observations*
+-   Confidence intervals are meant to capture the *mean trend*
+-   Prediction intervals are meant to capture *new observations*
 
 Both CI and PI are a quantification of the uncertainty in our model, but the two intervals designed to answer different questions.
 
 Since CI and PI are a quantification of uncertainty, they should tend to *narrow* as our model becomes more confident in its predictions. Building a more accurate model will often lead to a reduction in uncertainty. We'll see this phenomenon in action with the following task:
 
-### __q5__ The following code will construct a predicted-vs-actual plot with your model from *q4* and add prediction intervals. Study the results and answer the questions below under *observations*.
+### **q5** The following code will construct a predicted-vs-actual plot with your model from *q4* and add prediction intervals. Study the results and answer the questions below under *observations*.
 
 ```{r q5-task}
 ## TODO: Run this code and interpret the results
@@ -257,11 +414,11 @@ Since CI and PI are a quantification of uncertainty, they should tend to *narrow
 bind_rows(
   df_validate %>% 
     add_uncertainties(fit_simple, interval = "prediction", prefix = "pi") %>% 
-    select(T_norm, pi_lwr, pi_fit, pi_upr) %>% 
+    dplyr::select(T_norm, pi_lwr, pi_fit, pi_upr) %>% 
     mutate(model = "x only"),
   df_validate %>% 
     add_uncertainties(fit_q4, interval = "prediction", prefix = "pi") %>% 
-    select(T_norm, pi_lwr, pi_fit, pi_upr) %>% 
+    dplyr::select(T_norm, pi_lwr, pi_fit, pi_upr) %>% 
     mutate(model = "q4"),
 ) %>% 
   
@@ -284,12 +441,12 @@ bind_rows(
 
 **Observations**:
 
-- Which model tends to be more accurate? How can you tell from this predicted-vs-actual plot?
-  - (Your response here)
-- Which model tends to be *more confident* in its predictions? Put differently, which model has *narrower prediction intervals*?
-  - (Your response here)
-- How many predictors does the `fit_simple` model need in order to make a prediction? What about your model `fit_q4`?
-  - (Your response here)
+-   Which model tends to be more accurate? How can you tell from this predicted-vs-actual plot?
+    -   I think that q4 is more accurate the predictions much more closely follow the actual line. The x only model does contain the actual line within all of its prediction intervals, unlike the q 4 model that misses some, but that is because they are much larger.
+-   Which model tends to be *more confident* in its predictions? Put differently, which model has *narrower prediction intervals*?
+    -   the q4 model
+-   How many predictors does the `fit_simple` model need in order to make a prediction? What about your model `fit_q4`?
+    -   fit_simple only requires one predictor while fit_q4 requires six.
 
 Based on these results, you might be tempted to always throw every reasonable variable into the model. For some cases, that might be the best choice. However, some variables might be *outside our control*; for example, variables involving human behavior cannot be fully under our control. Other variables may be *too difficult to measure*; for example, it is *in theory* possible to predict the strength of a component by having detailed knowledge of its microstructure. However, it is *patently infeasible* to do a detailed study of *every single component* that gets used in an airplane.
 
@@ -297,7 +454,7 @@ In both cases---human behavior and variable material properties---we would be be
 
 # Case Study: Predicting Performance Ranges
 
-### __q6__ You are consulting with a team that is designing a prototype heat transfer device. They are asking you to help determine a *dependable range of values* for `T_norm` they can design around for this *single prototype*. The realized value of `T_norm` must not be too high as it may damage the downstream equipment, but it must also be high enough to extract an acceptable amount of heat.
+### **q6** You are consulting with a team that is designing a prototype heat transfer device. They are asking you to help determine a *dependable range of values* for `T_norm` they can design around for this *single prototype*. The realized value of `T_norm` must not be too high as it may damage the downstream equipment, but it must also be high enough to extract an acceptable amount of heat.
 
 In order to maximize the conditions under which this device can operate successfully, the design team has chosen to fix the variables listed in the table below, and consider the other variables to fluctuate according to the values observed in `df_psaap`.
 
@@ -324,25 +481,85 @@ pr_level <- 0.8
 #        use the validation data to check your uncertainty estimates, and 
 #        make a recommendation on a *dependable range* of values for T_norm
 #        at the point `df_design`
-fit_q6 <- NA
+fit_q6 <- 
+  df_train %>%
+  lm(data = ., formula = T_norm ~ x + L + W + U_0)
 
+df_validate_pi <- 
+  df_validate %>%
+    add_uncertainties(
+      model = fit_q6,
+      prefix = "pi",
+      interval = "prediction",
+      level = pr_level
+    ) 
+
+
+df_validate_pi %>% 
+  
+  ggplot(aes(T_norm, pi_fit)) +
+  geom_abline(slope = 1, 
+              intercept = 0, 
+              color = "grey80", 
+              size = 2
+              ) +
+  geom_errorbar(
+    aes(ymin = pi_lwr, ymax = pi_upr),
+    width = 0
+  ) +
+  geom_point() +
+  geom_errorbar(
+    data = . %>% filter(T_norm < pi_lwr | pi_upr < T_norm),
+    aes(ymin = pi_lwr, ymax = pi_upr),
+    width = 0,
+    color = "salmon"
+  ) +
+  geom_point(
+    data = . %>% filter(T_norm < pi_lwr | pi_upr < T_norm),
+    aes(T_norm, pi_fit),
+    color = "salmon"
+  ) +
+  
+  theme_minimal() +
+  labs(
+    title = "Predicted vs Actual",
+    x = "Actual T_norm",
+    y = "Predicted T_norm"
+  )
+
+df_validate_pi%>%
+  summarize(coverage = mean(pi_lwr <= T_norm & T_norm <= pi_upr))
+
+df_design_pi <-
+  df_design %>%
+    add_uncertainties(
+      model = fit_q6,
+      prefix = "pred",
+      interval = "prediction",
+      level = pr_level
+    ) %>% 
+    glimpse()
+
+df_validate_pi %>%
+  #filter(T_norm < df_design_pi$pred_upr | df_design_pi$pred_lwr < T_norm)
+  summarize(coverage = mean(df_design_pi$pred_lwr <= T_norm & T_norm <= df_design_pi$pred_upr))
 ```
 
 **Recommendation**:
 
-- How much do you trust your model? Why?
-  - (Your response here)
-- What kind of interval---confidence or prediction---would you use for this task, and why?
-  - (Your response here)
-- What fraction of validation cases lie within the interval you predict? How does this compare with `pr_level`?
-  - (Your response here)
-- What interval for `T_norm` would you recommend the design team to plan around?
-  - (Your response here)
-- Are there any other recommendations you would provide?
-  - (Your response here)
+-   How much do you trust your model? Why?
+    -   I think the model it pretty trust worthy. It has a coverage of 93% for the validation data and the actual vs predicted t norm plot looks like it has relatively tight PIs.
+-   What kind of interval---confidence or prediction---would you use for this task, and why?
+    -   I would use a prediction interval since we are trying to predict values.
+-   What fraction of validation cases lie within the interval you predict? How does this compare with `pr_level`?
+    -   approximately 93% of validation cases lie within the PI which is considerably higher than pr_level. 5% of validation cases lie within the design interval but this seems reasonable given the fixed design parameters.
+-   What interval for `T_norm` would you recommend the design team to plan around?
+    -   I would recommend the interval [1.45685, 2.296426]
+-   Are there any other recommendations you would provide?
+    -   It would also probably be helpful for them to try to maintain a steady bulk velocity and to pay attention to the Radiation intensity when running experiments. If it is not counterproductive to the goal of their heat exchange it would also be helpful to pick a single type of fluid, this would at least somewhat control many of the other variables.
 
 *Bonus*: One way you could take this analysis further is to recommend which other variables the design team should tightly control. You could do this by fixing values in `df_design` and adding them to the model. An exercise you could carry out would be to systematically test the variables to see which ones the design team should more tightly control.
 
 # References
 
-- [1] Jofre, del Rosario, and Iaccarino "Data-driven dimensional analysis of heat transfer in irradiated particle-laden turbulent flow" (2020) *International Journal of Multiphase Flow*, https://doi.org/10.1016/j.ijmultiphaseflow.2019.103198
+-   [1] Jofre, del Rosario, and Iaccarino "Data-driven dimensional analysis of heat transfer in irradiated particle-laden turbulent flow" (2020) *International Journal of Multiphase Flow*, <https://doi.org/10.1016/j.ijmultiphaseflow.2019.103198>
